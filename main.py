@@ -1,5 +1,5 @@
 import re
-
+import math
 
 def calcul_factorial(n):
     if n == 0 or n == 1:
@@ -8,7 +8,6 @@ def calcul_factorial(n):
     for i in range(2, n + 1):
         rezultat *= i
     return rezultat
-
 
 def calculeaza_sinus(grade):
     pi_aproximat = 3.141592653589793
@@ -24,13 +23,18 @@ def calculeaza_sinus(grade):
 
     return round(sin_x, 5)
 
+def calculeaza_cosinus(grade):
+    """Calculează cos(x) folosind funcția din biblioteca math"""
+    # math.cos primește radiani, deci convertim gradele în radiani
+    radiani = math.radians(grade)
+    rezultat_cos = math.cos(radiani)
+    return round(rezultat_cos, 5)
 
 def converteste(val):
     try:
         return float(val) if '.' in val else int(val)
     except ValueError:
         return val
-
 
 def evalueaza_expresie_simpla(expr_str):
     """Evaluează o expresie simplă aritmetică (ex: 2*3 sau 13+12) folosind logica ta de CLI v2"""
@@ -55,25 +59,22 @@ def evalueaza_expresie_simpla(expr_str):
             rezultat /= val if val != 0 else 1
     return rezultat
 
-
 def main():
-    print("--- Calculator CLI v3 (Suport Operații în Sinus) ---")
+    print("--- Calculator CLI v4 (Suport Sinus și Cosinus) ---")
     while True:
         expr = input("\nExpresie: ").replace(" ", "")
 
         if expr.lower() == 'iesire':
             break
 
-        # Pasul 1: Căutăm orice apariție de tipul sin(...)
+        # Pasul 1: Căutăm și înlocuim orice apariție de tipul sin(...)
         while True:
-            # ReGex-ul prinde tot ce este în paranteza lui sin, inclusiv caractere ca +, -, *, /
             match_sin = re.search(r"sin\((.+?)\)", expr, re.IGNORECASE)
             if not match_sin:
                 break
 
             continut_paranteza = match_sin.group(1)
 
-            # Dacă în paranteză avem o operație (ex: 2*3), o calculăm mai întâi
             if any(op in continut_paranteza for op in ['+', '-', '*', '/']):
                 rezultat_interior = evalueaza_expresie_simpla(continut_paranteza)
                 grad = float(rezultat_interior)
@@ -82,6 +83,23 @@ def main():
 
             valoare_sin = calculeaza_sinus(grad)
             expr = expr.replace(match_sin.group(0), str(valoare_sin))
+
+        # Pasul 1.5: Căutăm și înlocuim orice apariție de tipul cos(...)
+        while True:
+            match_cos = re.search(r"cos\((.+?)\)", expr, re.IGNORECASE)
+            if not match_cos:
+                break
+
+            continut_paranteza = match_cos.group(1)
+
+            if any(op in continut_paranteza for op in ['+', '-', '*', '/']):
+                rezultat_interior = evalueaza_expresie_simpla(continut_paranteza)
+                grad = float(rezultat_interior)
+            else:
+                grad = float(continut_paranteza)
+
+            valoare_cos = calculeaza_cosinus(grad)
+            expr = expr.replace(match_cos.group(0), str(valoare_cos))
 
         # Pasul 2: Calculul final al întregii expresii rămase
         tokens = re.findall(r'[a-zA-Z0-9.]+|[+\-*/]', expr)
@@ -119,7 +137,5 @@ def main():
         if not eroare:
             print(f"Rezultat: {rezultat}")
 
-
 if __name__ == "__main__":
     main()
-
