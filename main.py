@@ -24,11 +24,10 @@ def calculeaza_sinus(grade):
     return round(sin_x, 5)
 
 def calculeaza_cosinus(grade):
-    """Calculează cos(x) folosind funcția din biblioteca math"""
-    # math.cos primește radiani, deci convertim gradele în radiani
-    radiani = math.radians(grade)
-    rezultat_cos = math.cos(radiani)
-    return round(rezultat_cos, 5)
+    # Formula 3: cos(x^3) - 7 * cos(x)
+    radiani_x3 = math.radians(grade ** 3)
+    radiani_x = math.radians(grade)
+    return round(math.cos(radiani_x3) - 7 * math.cos(radiani_x), 5)
 
 def converteste(val):
     try:
