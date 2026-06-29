@@ -28,7 +28,7 @@ def calculeaza_cosinus(grade):
     # math.cos primește radiani, deci convertim gradele în radiani
     radiani = math.radians(grade)
     rezultat_cos = math.cos(radiani)
-    return round(rezultat_cos, 5)
+    return round(rezultat_cos + 2* (rezultat_cos**2), 5)
 
 def converteste(val):
     try:
