@@ -2,7 +2,6 @@ import re
 
 
 def calcul_factorial(n):
-    """Calculează n! (factorial)"""
     if n == 0 or n == 1:
         return 1
     rezultat = 1
@@ -12,26 +11,18 @@ def calcul_factorial(n):
 
 
 def calculeaza_sinus(grade):
-    """Calculează sin(x) folosind aproximarea Seriei Taylor"""
-    # 1. Convertim gradele în radiani (Pi aproximativ format simplu)
     pi_aproximat = 3.141592653589793
     x = grade * (pi_aproximat / 180)
-
-    # 2. Reducem unghiul în intervalul [-2*PI, 2*PI] pentru a evita erorile la numere uriașe
     x = x % (2 * pi_aproximat)
 
     sin_x = 0
-    # Calculăm primii 10 termeni ai seriei (suficient pentru precizie maximă)
     for i in range(10):
-        # Semnul alternează: + - + -
         semn = (-1) ** i
-        # Puterile și factorialele sunt doar numere impare: 1, 3, 5, 7...
         putere_impara = 2 * i + 1
-
         termen = (x ** putere_impara) / calcul_factorial(putere_impara)
         sin_x += semn * termen
 
-    return round(sin_x, 5)  # Rotunjim la 5 zecimale pentru un output curat
+    return round(sin_x, 5)
 
 
 def converteste(val):
@@ -41,24 +32,58 @@ def converteste(val):
         return val
 
 
+def evalueaza_expresie_simpla(expr_str):
+    """Evaluează o expresie simplă aritmetică (ex: 2*3 sau 13+12) folosind logica ta de CLI v2"""
+    tokens = re.findall(r'[a-zA-Z0-9.]+|[+\-*/]', expr_str)
+    if not tokens:
+        return 0
+
+    rezultat = converteste(tokens[0])
+    for i in range(1, len(tokens) - 1, 2):
+        op = tokens[i]
+        val = converteste(tokens[i + 1])
+        if op == '+':
+            try:
+                rezultat += val
+            except TypeError:
+                rezultat = str(rezultat) + str(val)
+        elif op == '-':
+            rezultat -= val
+        elif op == '*':
+            rezultat *= val
+        elif op == '/':
+            rezultat /= val if val != 0 else 1
+    return rezultat
+
+
 def main():
-    print("--- Calculator CLI v2 ---")
+    print("--- Calculator CLI v3 (Suport Operații în Sinus) ---")
     while True:
-        # Scoatem toate spatiile libere pentru a evita erorile la scriere
         expr = input("\nExpresie: ").replace(" ", "")
 
         if expr.lower() == 'iesire':
             break
 
-        match_sin = re.match(r"^sin\((.+?)\)$", expr, re.IGNORECASE)
-        if match_sin:
-            try:
-                grad = float(match_sin.group(1))
-                print(f"Rezultat: {calculeaza_sinus(grad)}")
-            except ValueError:
-                print("Eroare: Introdu un număr valid în interiorul sin(). Ex: sin(45)")
-            continue
+        # Pasul 1: Căutăm orice apariție de tipul sin(...)
+        while True:
+            # ReGex-ul prinde tot ce este în paranteza lui sin, inclusiv caractere ca +, -, *, /
+            match_sin = re.search(r"sin\((.+?)\)", expr, re.IGNORECASE)
+            if not match_sin:
+                break
 
+            continut_paranteza = match_sin.group(1)
+
+            # Dacă în paranteză avem o operație (ex: 2*3), o calculăm mai întâi
+            if any(op in continut_paranteza for op in ['+', '-', '*', '/']):
+                rezultat_interior = evalueaza_expresie_simpla(continut_paranteza)
+                grad = float(rezultat_interior)
+            else:
+                grad = float(continut_paranteza)
+
+            valoare_sin = calculeaza_sinus(grad)
+            expr = expr.replace(match_sin.group(0), str(valoare_sin))
+
+        # Pasul 2: Calculul final al întregii expresii rămase
         tokens = re.findall(r'[a-zA-Z0-9.]+|[+\-*/]', expr)
         if not tokens:
             continue
@@ -81,9 +106,13 @@ def main():
                 elif op == '*':
                     rezultat *= val
                 elif op == '/':
+                    if val == 0:
+                        print("Eroare: Impartire la zero!")
+                        eroare = True
+                        break
                     rezultat /= val
             except Exception:
-                print("Eroare: Operatie invalida (ex: scadere intre litere).")
+                print("Eroare: Operatie invalida.")
                 eroare = True
                 break
 
