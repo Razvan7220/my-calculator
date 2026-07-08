@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 # Oprim scriptul imediat dacă apare vreo eroare
 set -e
 
