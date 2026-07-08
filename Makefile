@@ -22,7 +22,7 @@ debug: main.py
 release: main.py
 	@echo "Compilare în mod RELEASE (cu strip)..."
 	$(CC) $(CFLAGS_RELEASE) main.py
-	@echo "Generare librărie simulată (dummy) pentru cerință..."
+	@echo "Generare bibliotecă simulată (dummy) pentru cerință..."
 	@touch $(LIBRARY_NAME)
 
 # c. clean - șterge fișierele temporare și binarele generate
@@ -33,7 +33,7 @@ clean:
 # d. install - mută binarul și librăria în directoarele de sistem cu masca 0644
 # Are ca dependență 'release' (nu poți instala fără compilare)
 install: release
-	@echo "Instalare binar și librărie în sistem cu masca 0644..."
+	@echo "Instalare binar și bibliotecile în sistem cu masca 0644..."
 	install -m 0644 dist/$(BINARY_NAME) $(INSTALL_BIN_DIR)/$(BINARY_NAME)
 	install -m 0644 $(LIBRARY_NAME) $(INSTALL_LIB_DIR)/$(LIBRARY_NAME)
 
